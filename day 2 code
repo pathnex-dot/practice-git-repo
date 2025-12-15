@@ -3,7 +3,7 @@
   ## Ansible -Install & enable Nginx
 
   ---
-  -name: install and start Nginx on pathnex
+  -name: install and start Nginx on linux servers
   Hosts: all
   become: yes
 
