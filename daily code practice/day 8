@@ -1,0 +1,45 @@
+Day 08 — Variables, VPC, Probes, Loops
+
+##  Ansible — Install Packages Using Variables
+
+---
+- name: Install packages for college using variables
+  hosts: all
+  become: yes
+
+  vars:
+    college_packages:
+      - tree
+      - unzip
+      - vim
+
+  tasks:
+    - name: Install required packages
+      yum:
+        name: "{{ college_packages }}"
+        state: present
+
+
+##  Terraform — Create VPC + Subnet
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_vpc" "collegeVPC" {
+  cidr_block = "10.10.0.0/16"
+
+  tags = {
+    Name = "college-VPC"
+  }
+}
+
+resource "aws_subnet" "college_Subnet" {
+  vpc_id                  = aws_vpc.collegeVPC.id
+  cidr_block              = "10.10.1.0/24"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "college-Subnet"
+  }
+}
