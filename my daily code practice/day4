@@ -1,0 +1,101 @@
+# day 04 -more packages,key pairs,service
+## Ansible - Install multiple packages
+
+--- 
+-name: Install packages for mycollege
+ host: all
+ become: yes
+
+ tasks:
+    -name: Install tools
+     yum: 
+        name:
+           -git
+           -wget
+          state: present
+
+
+## Terraform - EC2 with key pair (C6i.8xlarge)
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws-key-pair" "mycollegekey"{
+    key_name = "pathnexkey"
+    Public_kay = "ssh-rsa AAAA...."
+}
+
+resource "aws_instance" "mycollegeEC2" {
+    ami           = "ami-0abcd2356abcd2356"
+    instance_type = "c6i.8xlarge"
+    key_name      = aws_key_pair.Mycollege.key_name
+
+    Tags {
+        Name = "Mycollege-EC2"
+
+    }
+}
+
+
+## Kubernetes - create clusterIP service
+
+apiversion: v1
+kind: service
+metadata:
+    name: Mycollege-service
+spec:
+    selector:
+       app:Mycollege-app
+    ports:
+       -port:80
+        targetport:80
+
+
+# parallel Builds
+## jenkins pipeline - Parallel Build & Test
+
+pipeline {
+    agent any
+    stages {
+        stage('parallel tasks') {
+            parallel {
+                stage('Build') {
+                    steps {
+                        sh 'mvn clean compile'
+                    }
+                }
+                stage('test'){
+                    steps {
+                        sh 'mvn test'
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+## gitlab CI - parallel jobs
+
+stages:
+   -build-test
+
+maven-build:
+    stage: build-test
+    image: maven:3.8.1-jdk-17
+    script:
+       -git clone https://github.com/pathnex-dot/practice-git-repo.git
+       -cd sample -java-app
+       -mvn clean compile
+      parallel:1
+
+    maven-test:
+       stage: buils-test
+       image: maven:3.8.1-jdk-17
+       script:
+          -cd sample-java-app
+          -mvn test
+        parallel:1
+
+
